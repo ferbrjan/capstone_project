@@ -87,4 +87,12 @@ int main(int argc, const char * argv[]) {
         
     }
     destroyWindow("original");
+    
+    Mat t_labels,t_features;
+    t_features=prepare_training_features();
+    t_labels=prepare_training_labels();
+    
+    cout<<"Labels are"<<t_labels<<"\nFeatures are"<<t_features<<endl;
+    
+    create_bayes(t_features, t_labels);
 }

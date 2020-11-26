@@ -12,12 +12,175 @@
 #include <stdio.h>
 #include <iostream>
 #include <opencv/cv.hpp>
+#include <opencv/ml.h>
+#include <vector>
 #include <math.h>
+
+#define NCLASS1 3
+#define NCLASS2 4
+#define NCLASS3 13
+#define TRAIN_SAMPLES (NCLASS1+NCLASS2+NCLASS3)
 
 using namespace cv;
 using namespace std;
 
 #endif /* capstone_hpp */
+
+
+static Ptr<ml::TrainData> prep_train_data(const Mat& data, const Mat& responses, int ntrain_samples){
+    Mat sample_idx= Mat::zeros(1, data.rows,CV_8U);
+    Mat train_samples=sample_idx.colRange(0,ntrain_samples);
+    train_samples.setTo(Scalar::all(1));
+    
+    int nvars = data.cols;
+    Mat var_type(nvars + 1,1,CV_8U);
+    var_type.setTo(Scalar::all(ml::VAR_ORDERED));
+    var_type.at<uchar>(nvars)=ml::VAR_CATEGORICAL;
+    
+    return ml::TrainData::create(data,ml::ROW_SAMPLE,responses,noArray(),sample_idx,noArray(),var_type);
+}
+
+Mat prepare_training_features(){
+    Mat image,binary_img,bullshit;
+    vector<vector<Point>> contours;
+    
+    int n_contours,k=0;
+    double perimeter,area;
+    
+    Mat train_features(TRAIN_SAMPLES,2,CV_32FC1);
+    Mat train_labels(TRAIN_SAMPLES,1,CV_32FC1);
+    
+    string classes_names[3] = {"Nail","Screw","Thumbtack"};
+    string imgs_names[3] = {"Clase1.tif","Clase2.tif","Clase3.tif"};
+    for(int i=0 ; i<3 ; i++){
+        string route = ("/Users/dinokfenicky/downloads/lesson_9/" + (imgs_names[i]));
+        image=imread(route,IMREAD_GRAYSCALE);
+        if(!image.data){
+            cerr<<"ERROR LOADING TRAINING"<<endl;
+            return bullshit;
+        }
+        
+        binary_img=Mat(image.size(),CV_8UC1);
+        threshold(image,binary_img,128,255,THRESH_BINARY);
+        
+        //imshow("training",binary_img);
+        //waitKey(0);
+        
+        findContours(binary_img.clone(), contours, RETR_LIST,CHAIN_APPROX_NONE);
+        n_contours = contours.size();
+        
+        cout<<"Total number of "<<imgs_names[i]<<":"<<n_contours<<endl;
+        
+        for (size_t idx =0;idx<n_contours;idx++,k++){
+            area=contourArea(contours[idx],false);
+            perimeter=arcLength(contours[idx], true);
+            
+            train_features.at<float>(k,0)=perimeter;
+            train_features.at<float>(k,1)=area;
+            train_labels.at<float>(k)=i;
+            
+        }
+    }
+    return train_features;
+}
+
+Mat prepare_training_labels(){
+    Mat image,binary_img,bullshit;
+    vector<vector<Point>> contours;
+    
+    int n_contours,k=0;
+    double perimeter,area;
+    
+    Mat train_features(TRAIN_SAMPLES,2,CV_32FC1);
+    Mat train_labels(TRAIN_SAMPLES,1,CV_32FC1);
+    
+    string classes_names[3] = {"Nail","Screw","Thumbtack"};
+    string imgs_names[3] = {"Clase1.tif","Clase2.tif","Clase3.tif"};
+    for(int i=0 ; i<3 ; i++){
+        string route = ("/Users/dinokfenicky/downloads/lesson_9/" + (imgs_names[i]));
+        image=imread(route,IMREAD_GRAYSCALE);
+        if(!image.data){
+            cerr<<"ERROR LOADING TRAINING"<<endl;
+            return bullshit;
+        }
+        
+        binary_img=Mat(image.size(),CV_8UC1);
+        threshold(image,binary_img,128,255,THRESH_BINARY);
+        
+        //imshow("training",binary_img);
+        //waitKey(0);
+        
+        findContours(binary_img.clone(), contours, RETR_LIST,CHAIN_APPROX_NONE);
+        n_contours = contours.size();
+        
+        cout<<"Total number of "<<imgs_names[i]<<":"<<n_contours<<endl;
+        
+        for (size_t idx =0;idx<n_contours;idx++,k++){
+            area=contourArea(contours[idx],false);
+            perimeter=arcLength(contours[idx], true);
+            
+            train_features.at<float>(k,0)=perimeter;
+            train_features.at<float>(k,1)=area;
+            train_labels.at<float>(k)=i;
+            
+        }
+    }
+    return train_labels;
+}
+
+
+
+void create_bayes(Mat train_features,Mat train_labels){
+    int ntrain_samples = (int)(TRAIN_SAMPLES);
+    int n_contours;
+    double perimeter,area;
+    vector<vector<Point>> contours;
+    string classes_names[3] = {"Nail","Screw","Thumbtack"};
+    
+    Ptr<ml::NormalBayesClassifier>bayes = ml::NormalBayesClassifier::create();
+    Ptr<ml::TrainData>tdata = prep_train_data(train_features, train_labels, ntrain_samples);
+    bayes->train(tdata);
+    //test
+    Mat test_features(1,2,CV_32FC1);
+    Mat image,binary_img;
+    image=imread("/Users/dinokfenicky/downloads/lesson_9/test.tif",IMREAD_GRAYSCALE);
+    if(!image.data){
+        cerr<<"ERROR LOADING TRAINING"<<endl;
+        //return!!!
+    }
+    binary_img = Mat(image.size(),CV_8UC1);
+    threshold(image,binary_img,128,255,THRESH_BINARY);
+    
+    Mat color_img(image.size(),CV_8UC3);
+    cvtColor(image, color_img, CV_GRAY2BGR);
+    
+    findContours(binary_img.clone(), contours, RETR_LIST,CHAIN_APPROX_NONE);
+    n_contours = contours.size();
+    cout<<"Total number of pieces"<<":"<<n_contours<<endl;
+    Mat test_predcition(n_contours,1,CV_32FC1);
+    
+    for(size_t idx=0;idx<n_contours;idx++){
+        area=contourArea(contours[idx],false);
+        perimeter=arcLength(contours[idx], true);
+        
+        test_features.at<float>(0,0)=perimeter;
+        test_features.at<float>(0,1)=area;
+        
+        test_predcition.at<float>(idx)=bayes->predict(test_features);
+        
+        cvtColor(image,color_img, CV_GRAY2BGR);
+        Scalar color(0,0,255);
+        drawContours(color_img, contours, idx, color,2);
+        imshow("Test",color_img);
+        
+        cout<<"Highlited piece is a "<<classes_names[(int)test_predcition.at<float>(idx)]<<endl;
+        waitKey(0);
+    }
+    
+    
+}
+
+
 
 int MinMax(Mat & histogram)
 {
