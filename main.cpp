@@ -24,11 +24,9 @@ int main(int argc, const char * argv[]) {
     Mat labels,stats,centroids;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
-    time_t start,end;
-    double timer;
     
     //Open video
-    VideoCapture cap("/Users/dinokfenicky/desktop/red_ball_3.mp4");
+    VideoCapture cap("/Users/dinokfenicky/desktop/red_ball_1.mp4");
     
     //Errors?
     if(!cap.isOpened()){
@@ -37,6 +35,9 @@ int main(int argc, const char * argv[]) {
     }
 
     while(1){
+        
+        auto start = std::chrono::system_clock::now();
+        
         //take a frame from video capture
         cap>>img;
         
@@ -45,14 +46,8 @@ int main(int argc, const char * argv[]) {
             break;
 
         //resize img to fit the screen
-        cv::resize(img, img, cv::Size(), 0.25, 0.25);
-        
-        //FPS
-        double FPS = cap.get(CAP_PROP_FPS);
-        char str[200];
-        sprintf(str,"FPS: %f",FPS);
-        putText(img, str, Point2f(10,20+10), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
-        
+        cv::resize(img, img, cv::Size(), 0.4, 0.4);
+
         //Thresholding
         Mat thresh=make_Colour_Thresh(img,0);
         imshow("adsadasd", thresh);
@@ -73,7 +68,7 @@ int main(int argc, const char * argv[]) {
             double area = contourArea(contours[i]);
             //cout<<perimeter,area;
             double compactness = (perimeter*perimeter)/area;
-            if (compactness>0 && compactness<15 && area>50){
+            if (compactness>0 && compactness<15 && area>100){
                 cnt++;
                 drawContours( img, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
                 Rect rectangl=boundingRect(contours[i]);
@@ -85,6 +80,12 @@ int main(int argc, const char * argv[]) {
                 circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
             }
         }
+        auto end = std::chrono::system_clock::now();
+        std::chrono::duration<double> diff = end-start;
+        int FPS = 1 / diff.count();
+        char str[200];
+        sprintf(str,"FPS: %i",FPS);
+        putText(img, str, Point2f(10,20+10), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
         
         //Results
         namedWindow("original",CV_WINDOW_AUTOSIZE);
