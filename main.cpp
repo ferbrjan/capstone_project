@@ -24,6 +24,8 @@ int main(int argc, const char * argv[]) {
     Mat labels,stats,centroids;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
+    time_t start,end;
+    double timer;
     
     //Open video
     VideoCapture cap("/Users/dinokfenicky/desktop/red_ball_3.mp4");
@@ -38,9 +40,6 @@ int main(int argc, const char * argv[]) {
         //take a frame from video capture
         cap>>img;
         
-        //FPS?!?!
-        //CV_CAP_PROP_FPS
-        
         //if the frame is empty, break
         if (img.empty())
             break;
@@ -48,32 +47,43 @@ int main(int argc, const char * argv[]) {
         //resize img to fit the screen
         cv::resize(img, img, cv::Size(), 0.25, 0.25);
         
+        //FPS
+        double FPS = cap.get(CAP_PROP_FPS);
+        char str[200];
+        sprintf(str,"FPS: %f",FPS);
+        putText(img, str, Point2f(10,20+10), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
+        
         //Thresholding
-        Mat sat_Thresh=make_Sat_Hist(img);
+        Mat thresh=make_Colour_Thresh(img,0);
+        imshow("adsadasd", thresh);
         
         //Find different stats of objects
-        connectedComponentsWithStats(sat_Thresh, labels, stats, centroids,8,CV_32S);
+        connectedComponentsWithStats(thresh, labels, stats, centroids,8,CV_32S);
         
         //number of all objects NEEDS TO BE EDITED TO DETECT BALLS ONLY (RED,GREEN,ETC)
         int object_cnt=stats.rows;
         
-        //Text
-        for (int i=1;i<object_cnt;i++){
-            char str[200];
-            sprintf(str,"[%f , %f] is centre",centroids.at<double>(i, 0), centroids.at<double>(i, 1));
-            putText(img, str, Point2f(10,20+10*i), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
-            
-            //Colour? works for red only rn, different thresholds needed for green and blue (thresholding???)
-            int colour=get_Colour(img, Point(centroids.at<double>(i, 0),centroids.at<double>(i, 1)));
-            //cout<<"\n"<<colour;
-        }
-        
-        //Contours
-        findContours(sat_Thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        //Contours + drawings in the pic
+        findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        int cnt=0;
         for( size_t i = 0; i< contours.size(); i++ )
         {
             Scalar color = Scalar( 0,255,0);
-            drawContours( img, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+            double perimeter = arcLength(contours[i], true);
+            double area = contourArea(contours[i]);
+            //cout<<perimeter,area;
+            double compactness = (perimeter*perimeter)/area;
+            if (compactness>0 && compactness<15 && area>50){
+                cnt++;
+                drawContours( img, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+                Rect rectangl=boundingRect(contours[i]);
+                double cx = rectangl.x + rectangl.width/2;
+                double cy = rectangl.y + rectangl.height/2;
+                char str[200];
+                sprintf(str,"[%f , %f] is centre",cx, cy);
+                putText(img, str, Point2f(10,20+10*(cnt+1)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
+                circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
+            }
         }
         
         //Results
@@ -84,15 +94,14 @@ int main(int argc, const char * argv[]) {
         char c=(char)waitKey(25);
         if(c==27)
             break;
-        
     }
     destroyWindow("original");
     
-    Mat t_labels,t_features;
-    t_features=prepare_training_features();
-    t_labels=prepare_training_labels();
+    //Mat t_labels,t_features;
+    //t_features=prepare_training_features();
+    //t_labels=prepare_training_labels();
     
-    cout<<"Labels are"<<t_labels<<"\nFeatures are"<<t_features<<endl;
+    //cout<<"Labels are"<<t_labels<<"\nFeatures are"<<t_features<<endl;
     
-    create_bayes(t_features, t_labels);
+    //create_bayes(t_features, t_labels);
 }

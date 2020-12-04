@@ -250,61 +250,25 @@ Mat make_Histogram(Mat img)
     return histogram;
 }
 
-Mat make_Sat_Hist(Mat img){
-    Mat red;
-    Mat HSV;
-    Mat green;
-    Mat blue;
-    Mat splitted[] = {red,green,blue};
-    Mat sat_Hist;
+Mat make_Colour_Thresh(Mat img,int colour_code){ //0 for red , 1 for blue, 2 for green
+    Mat HSV,H,S,V;
+    Mat splitted[]={H,S,V};
     cvtColor(img, HSV ,CV_BGR2HSV);
-    split(HSV, splitted);
-    sat_Hist=make_Histogram(splitted[1]);
-    int threshold_Val = MinMax(sat_Hist);
-    Mat sat_Thresh(splitted[1].size(),CV_8UC1),res;
-    cv::threshold(splitted[1], sat_Thresh, double(threshold_Val), double(255), cv::THRESH_OTSU);
-    return sat_Thresh;
+    Mat mask1,mask2;
+    //split(HSV, splitted);
+    //imshow("V",splitted[1]);
+    if (colour_code==0){
+        inRange(HSV, Scalar(0, 120, 70), Scalar(10, 255, 255), mask1);
+        inRange(HSV, Scalar(170, 120, 70), Scalar(180, 255, 255), mask2);
+        mask1 = mask1 + mask2;
+    }
+    if (colour_code==1){
+        inRange(HSV, Scalar(105, 120, 70), Scalar(135, 255, 255), mask1);
+    }
+    if (colour_code==2){
+        inRange(HSV, Scalar(45, 120, 70), Scalar(75, 255, 255), mask1);
+    }
+    
+    return mask1;
 }
-
-int get_Colour(Mat img,Point point){
-    Mat red;
-    Mat green;
-    Mat blue;
-    Mat RGB;
-    Mat splitted[] = {red,green,blue};
-    int res=0;
-    
-    cvtColor(img, RGB ,CV_BGR2RGB);
-    split(RGB,splitted);
-    
-    imshow("R", splitted[0]);
-    imshow("G", splitted[1]);
-    imshow("B", splitted[2]);
-    
-    int red_value = splitted[0].at<uchar>(point);
-    //cout<<"\n red value is:"<<red_value;
-    int green_value = splitted[1].at<uchar>(point);
-    //cout<<"\n green value is:"<<green_value;
-    int blue_value = splitted[2].at<uchar>(point);
-    //cout<<"\n blue value is:"<<blue_value;
-    
-    if (red_value > 100 && green_value < 100 && blue_value < 100){
-        res=1;
-        cout<<"\nobject is red";
-    }
-    else if (green_value > 100 && red_value < 100 && blue_value < 100){
-        res=2;
-        cout<<"\nobject is green";
-    }
-    else if (blue_value > 100 && red_value < 100 && green_value < 100){
-        res=3;
-        cout<<"\nobject is blue";
-    }
-    else
-    {
-        cout<<"\nOBJECT WITH UNIDENTIFIABLE COLOUR";
-    }
-    return res;
-}
-
 
