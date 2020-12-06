@@ -13,6 +13,8 @@
 #include <iostream>
 #include <opencv/cv.hpp>
 #include <opencv/ml.h>
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
 #include <vector>
 #include <math.h>
 
@@ -272,3 +274,14 @@ Mat make_Colour_Thresh(Mat img,int colour_code){ //0 for red , 1 for blue, 2 for
     return mask1;
 }
 
+void Erosion( int erosion_elem, int erosion_size, Mat src,void*)
+{
+    Mat erosion_dst;
+    int erosion_type = 0;
+    if( erosion_elem == 0 ){ erosion_type = MORPH_RECT; }
+    else if( erosion_elem == 1 ){ erosion_type = MORPH_CROSS; }
+    else if( erosion_elem == 2) { erosion_type = MORPH_ELLIPSE; }
+    Mat element = getStructuringElement( erosion_type, Size( 2*erosion_size + 1, 2*erosion_size+1 ),Point( erosion_size, erosion_size ) );
+    erode( src, src, element );
+    imshow( "Erosion Demo", src );
+}

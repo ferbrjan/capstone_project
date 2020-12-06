@@ -51,19 +51,40 @@ int main(int argc, const char * argv[]) {
         //Thresholding
         Mat thresh=make_Colour_Thresh(img,0);
         imshow("adsadasd", thresh);
+        //Erosion(1, 1, thresh, 0);
+        
+        //Hough circles detection (make this a function??)
+        Mat grayscale;
+        cvtColor(img, grayscale, CV_BGR2GRAY);
+        GaussianBlur( grayscale, grayscale, Size(9, 9), 3, 3 );
+        vector<Vec3f> circles;
+        HoughCircles(grayscale, circles, HOUGH_GRADIENT, 1,thresh.rows/8,100, 30, 10, 50);
+        for( size_t i = 0; i < circles.size(); i++ )
+        {
+            Vec3i c = circles[i];
+            Point center = Point(c[0], c[1]);
+            // circle center
+            circle( img, center, 1, Scalar(0,100,100), 3, LINE_AA);
+            // circle outline
+            int radius = c[2];
+            circle( img, center, radius, Scalar(255,0,255), 3, LINE_AA);
+            char str[200];
+            double cx = center.x;
+            double cy = center.y;
+            sprintf(str,"[%f , %f] is centre",cx, cy);
+            putText(img, str, Point2f(10,20+10*(2)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
+            circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
+        }
         
         //Find different stats of objects
         connectedComponentsWithStats(thresh, labels, stats, centroids,8,CV_32S);
-        
-        //number of all objects NEEDS TO BE EDITED TO DETECT BALLS ONLY (RED,GREEN,ETC)
-        int object_cnt=stats.rows;
         
         //Contours + drawings in the pic
         findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
         int cnt=0;
         for( size_t i = 0; i< contours.size(); i++ )
         {
-            Scalar color = Scalar( 0,255,0);
+            Scalar color = Scalar( 255,0,255);
             double perimeter = arcLength(contours[i], true);
             double area = contourArea(contours[i]);
             //cout<<perimeter,area;
@@ -71,15 +92,10 @@ int main(int argc, const char * argv[]) {
             if (compactness>0 && compactness<15 && area>100){
                 cnt++;
                 drawContours( img, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
-                Rect rectangl=boundingRect(contours[i]);
-                double cx = rectangl.x + rectangl.width/2;
-                double cy = rectangl.y + rectangl.height/2;
-                char str[200];
-                sprintf(str,"[%f , %f] is centre",cx, cy);
-                putText(img, str, Point2f(10,20+10*(cnt+1)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
-                circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
             }
         }
+        
+        //FPS
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> diff = end-start;
         int FPS = 1 / diff.count();
