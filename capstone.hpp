@@ -265,10 +265,10 @@ Mat make_Colour_Thresh(Mat img,int colour_code){ //0 for red , 1 for blue, 2 for
         mask1 = mask1 + mask2;
     }
     if (colour_code==1){
-        inRange(HSV, Scalar(105, 120, 70), Scalar(135, 255, 255), mask1);
+        inRange(HSV, Scalar(100, 120, 70), Scalar(140, 255, 255), mask1);
     }
     if (colour_code==2){
-        inRange(HSV, Scalar(45, 120, 70), Scalar(75, 255, 255), mask1);
+        inRange(HSV, Scalar(40, 120, 70), Scalar(80, 255, 255), mask1);
     }
     
     return mask1;
@@ -285,3 +285,4 @@ void Erosion( int erosion_elem, int erosion_size, Mat src,void*)
     erode( src, src, element );
     imshow( "Erosion Demo", src );
 }
+

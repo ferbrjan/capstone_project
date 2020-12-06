@@ -9,6 +9,7 @@
 #include "capstone.hpp"
 #include <iostream>
 #include <opencv/cv.hpp>
+#include "opencv2/imgcodecs.hpp"
 #include <math.h>
 #include <time.h>
 
@@ -22,6 +23,8 @@ int main(int argc, const char * argv[]) {
     Mat imgRGB;
     Mat img_res;
     Mat labels,stats,centroids;
+    Mat grayscale,HSV,H,S,V;
+    Mat splitted[]={H,S,V};
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
     
@@ -33,6 +36,13 @@ int main(int argc, const char * argv[]) {
         cout << "Error opening video stream or file" << endl;
         return -1;
     }
+    
+    int ball_color; //0 red, 1 blue, 2 green
+    const int alpha_slider_max = 2;
+    namedWindow("set colour", WINDOW_NORMAL);
+    createTrackbar( "Ball colour set:", "set colour", &ball_color, alpha_slider_max);
+    waitKey(0);
+    destroyWindow("set colour");
 
     while(1){
         
@@ -47,15 +57,18 @@ int main(int argc, const char * argv[]) {
 
         //resize img to fit the screen
         cv::resize(img, img, cv::Size(), 0.4, 0.4);
-
+        
         //Thresholding
-        Mat thresh=make_Colour_Thresh(img,0);
+        Mat thresh=make_Colour_Thresh(img,ball_color);
         imshow("adsadasd", thresh);
+        //cout<<"\n\n\n"<<thresh;
         //Erosion(1, 1, thresh, 0);
         
         //Hough circles detection (make this a function??)
-        Mat grayscale;
+        //Detects balls of all colours!!!
         cvtColor(img, grayscale, CV_BGR2GRAY);
+        cvtColor(img, HSV, CV_BGR2HSV);
+        split(HSV, splitted);
         GaussianBlur( grayscale, grayscale, Size(9, 9), 3, 3 );
         vector<Vec3f> circles;
         HoughCircles(grayscale, circles, HOUGH_GRADIENT, 1,thresh.rows/8,100, 30, 10, 50);
@@ -63,17 +76,21 @@ int main(int argc, const char * argv[]) {
         {
             Vec3i c = circles[i];
             Point center = Point(c[0], c[1]);
-            // circle center
-            circle( img, center, 1, Scalar(0,100,100), 3, LINE_AA);
-            // circle outline
-            int radius = c[2];
-            circle( img, center, radius, Scalar(255,0,255), 3, LINE_AA);
-            char str[200];
-            double cx = center.x;
-            double cy = center.y;
-            sprintf(str,"[%f , %f] is centre",cx, cy);
-            putText(img, str, Point2f(10,20+10*(2)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
-            circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
+            cout<<"\n"<<((int)thresh.at<uchar>(center));
+            if ((int)thresh.at<uchar>(center)==255)
+            {
+                // circle center
+                circle( img, center, 1, Scalar(0,100,100), 3, LINE_AA);
+                // circle outline
+                int radius = c[2];
+                circle( img, center, radius, Scalar(255,0,255), 3, LINE_AA);
+                char str[200];
+                double cx = center.x;
+                double cy = center.y;
+                sprintf(str,"[%f , %f] is centre",cx, cy);
+                putText(img, str, Point2f(10,20+10*(i+2)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
+                circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
+            }
         }
         
         //Find different stats of objects
@@ -92,6 +109,7 @@ int main(int argc, const char * argv[]) {
             if (compactness>0 && compactness<15 && area>100){
                 cnt++;
                 drawContours( img, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+                //DOES NOT WORK FOR GREEEN!!!!!!! alter thresholding for green
             }
         }
         
