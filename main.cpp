@@ -22,14 +22,13 @@ int main(int argc, const char * argv[]) {
     Mat img;
     Mat imgRGB;
     Mat img_res;
-    Mat labels,stats,centroids;
     Mat grayscale,HSV,H,S,V;
     Mat splitted[]={H,S,V};
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
     
     //Open video
-    VideoCapture cap("/Users/dinokfenicky/desktop/red_ball_1.mp4");
+    VideoCapture cap("/Users/dinokfenicky/desktop/two_balls_1.mp4");
     
     //Errors?
     if(!cap.isOpened()){
@@ -61,14 +60,10 @@ int main(int argc, const char * argv[]) {
         //Thresholding
         Mat thresh=make_Colour_Thresh(img,ball_color);
         imshow("adsadasd", thresh);
-        //cout<<"\n\n\n"<<thresh;
-        //Erosion(1, 1, thresh, 0);
         
         //Hough circles detection (make this a function??)
         //Detects balls of all colours!!!
         cvtColor(img, grayscale, CV_BGR2GRAY);
-        cvtColor(img, HSV, CV_BGR2HSV);
-        split(HSV, splitted);
         GaussianBlur( grayscale, grayscale, Size(9, 9), 3, 3 );
         vector<Vec3f> circles;
         HoughCircles(grayscale, circles, HOUGH_GRADIENT, 1,thresh.rows/8,100, 30, 10, 50);
@@ -92,9 +87,6 @@ int main(int argc, const char * argv[]) {
                 circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
             }
         }
-        
-        //Find different stats of objects
-        connectedComponentsWithStats(thresh, labels, stats, centroids,8,CV_32S);
         
         //Contours + drawings in the pic
         findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);

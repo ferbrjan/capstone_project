@@ -28,7 +28,7 @@ using namespace std;
 
 #endif /* capstone_hpp */
 
-
+/*
 static Ptr<ml::TrainData> prep_train_data(const Mat& data, const Mat& responses, int ntrain_samples){
     Mat sample_idx= Mat::zeros(1, data.rows,CV_8U);
     Mat train_samples=sample_idx.colRange(0,ntrain_samples);
@@ -182,7 +182,7 @@ void create_bayes(Mat train_features,Mat train_labels){
     
 }
 
-
+*/
 
 int MinMax(Mat & histogram)
 {
