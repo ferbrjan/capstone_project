@@ -30,6 +30,7 @@ int main(int argc, const char * argv[]) {
     
     //Open video
     VideoCapture cap("two_balls_1.mp4");//To use the webcam just use VideoCapture cap(0);
+    //Jan's route to video pls dont erase :DD "/Users/dinokfenicky/desktop/two_balls_1.mp4"
     
     //Errors?
     if(!cap.isOpened()){
@@ -37,10 +38,10 @@ int main(int argc, const char * argv[]) {
         return -1;
     }
     
-    int ball_color; //0 red, 1 blue, 2 green
-    const int alpha_slider_max = 2;
+    int ball_color; //0 red, 1 blue, 2 green, 3 yellow, 4 Black, 5 White
+    const int slider_max = 5;
     namedWindow("set colour", WINDOW_NORMAL);
-    createTrackbar( "Ball colour set:", "set colour", &ball_color, alpha_slider_max);
+    createTrackbar( "Ball colour set:", "set colour", &ball_color, slider_max);
     waitKey(0);
     destroyWindow("set colour");
 
@@ -72,7 +73,7 @@ int main(int argc, const char * argv[]) {
         {
             Vec3i c = circles[i];
             Point center = Point(c[0], c[1]);
-            cout<<"\n"<<((int)thresh.at<uchar>(center));
+            //cout<<"\n"<<((int)thresh.at<uchar>(center));
             if ((int)thresh.at<uchar>(center)==255)
             {
                 // circle center
