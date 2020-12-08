@@ -268,7 +268,7 @@ Mat make_Colour_Thresh(Mat img,int colour_code){ //0 for red , 1 for blue, 2 for
         inRange(HSV, Scalar(100, 120, 70), Scalar(140, 255, 255), mask1);
     }
     if (colour_code==2){
-        inRange(HSV, Scalar(40, 120, 70), Scalar(80, 255, 255), mask1);
+        inRange(HSV, Scalar(60, 120, 70), Scalar(95, 255, 255), mask1);
     }
     
     return mask1;
