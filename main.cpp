@@ -67,7 +67,7 @@ int main(int argc, const char * argv[]) {
         cvtColor(img, grayscale, CV_BGR2GRAY);
         GaussianBlur( grayscale, grayscale, Size(9, 9), 3, 3 );
         vector<Vec3f> circles;
-        HoughCircles(grayscale, circles, HOUGH_GRADIENT, 1,thresh.rows/8,100, 30, 10, 50);
+        HoughCircles(grayscale, circles, HOUGH_GRADIENT, 1,thresh.rows/16,100, 30, 10, 50);
         for( size_t i = 0; i < circles.size(); i++ )
         {
             Vec3i c = circles[i];
