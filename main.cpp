@@ -29,7 +29,7 @@ int main(int argc, const char * argv[]) {
     vector<Vec4i> hierarchy;
     
     //Open video
-    VideoCapture cap("two_balls_1.mp4");//To use the webcam just use VideoCapture cap(0);
+    VideoCapture cap("/Users/dinokfenicky/desktop/two_balls_1.mp4");//To use the webcam just use VideoCapture cap(0);
     //Jan's route to video pls dont erase :DD "/Users/dinokfenicky/desktop/two_balls_1.mp4"
     
     //Errors?
@@ -69,6 +69,7 @@ int main(int argc, const char * argv[]) {
         GaussianBlur( grayscale, grayscale, Size(9, 9), 3, 3 );
         vector<Vec3f> circles;
         HoughCircles(grayscale, circles, HOUGH_GRADIENT, 1,thresh.rows/16,100, 30, 10, 50);
+        int objectcnt=0;
         for( size_t i = 0; i < circles.size(); i++ )
         {
             Vec3i c = circles[i];
@@ -77,6 +78,7 @@ int main(int argc, const char * argv[]) {
             if ((int)thresh.at<uchar>(center)==255)
             {
                 // circle center
+                objectcnt++;
                 circle( img, center, 1, Scalar(0,100,100), 3, LINE_AA);
                 // circle outline
                 int radius = c[2];
@@ -84,8 +86,8 @@ int main(int argc, const char * argv[]) {
                 char str[200];
                 double cx = center.x;
                 double cy = center.y;
-                sprintf_s(str,"[%f , %f] is centre",cx, cy);
-                putText(img, str, Point2f(10,20+10*(i+2)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
+                sprintf(str,"[%f , %f] is centre of ball %i",cx, cy,objectcnt);
+                putText(img, str, Point2f(10,20+10*(objectcnt+2)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
                 circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
             }
         }
@@ -103,7 +105,7 @@ int main(int argc, const char * argv[]) {
             if (compactness>0 && compactness<15 && area>100){
                 cnt++;
                 drawContours( img, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
-                //DOES NOT WORK FOR GREEEN!!!!!!! alter thresholding for green
+                //DOES NOT WORK FOR WHITE
             }
         }
         
@@ -112,7 +114,7 @@ int main(int argc, const char * argv[]) {
         std::chrono::duration<double> diff = end-start;
         int FPS = 1 / diff.count();
         char str[200];
-        sprintf_s(str,"FPS: %i",FPS);
+        sprintf(str,"FPS: %i",FPS);
         putText(img, str, Point2f(10,20+10), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
         
         //Results
