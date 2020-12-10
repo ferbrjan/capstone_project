@@ -271,13 +271,13 @@ Mat make_Colour_Thresh(Mat img,int colour_code){ //0 for red , 1 for blue, 2 for
         inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
     }
     if (colour_code==3){ //yellow
-        inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
+        inRange(HSV, Scalar(20, 100, 50), Scalar(45, 255, 255), mask1);
     }
     if (colour_code==4){ //black
-        inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
+        inRange(HSV, Scalar(0, 0, 0), Scalar(180, 255, 30), mask1);
     }
     if (colour_code==5){ //white
-        inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
+        inRange(HSV, Scalar(0, 240, 100), Scalar(180, 255, 255), mask1);
     }
     
     return mask1;
