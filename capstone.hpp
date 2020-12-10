@@ -252,13 +252,19 @@ Mat make_Histogram(Mat img)
     return histogram;
 }
 
-Mat make_Colour_Thresh(Mat img,int colour_code){ //0 for red , 1 for blue, 2 for green
-    Mat HSV,H,S,V;
-    Mat splitted[]={H,S,V};
+Mat make_Colour_Thresh(Mat img,Point x){ //0 for red , 1 for blue, 2 for green
+    Mat HSV;
     cvtColor(img, HSV ,CV_BGR2HSV);
     Mat mask1,mask2;
     //split(HSV, splitted);
     //imshow("V",splitted[1]);
+    Vec3b hsv=HSV.at<Vec3b>(0,0);
+    int H=hsv.val[0]; //hue
+    int S=hsv.val[1]; //saturation
+    int V=hsv.val[2]; //value
+    
+    cout<< "hue value is "<<H<<", saturation value is "<<S<<", Value value is "<<V<<endl;
+    /*
     if (colour_code==0){
         inRange(HSV, Scalar(0, 120, 70), Scalar(10, 255, 255), mask1);
         inRange(HSV, Scalar(170, 120, 70), Scalar(180, 255, 255), mask2);
@@ -271,14 +277,15 @@ Mat make_Colour_Thresh(Mat img,int colour_code){ //0 for red , 1 for blue, 2 for
         inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
     }
     if (colour_code==3){ //yellow
-        inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
+        inRange(HSV, Scalar(20, 100, 50), Scalar(45, 255, 255), mask1);
     }
     if (colour_code==4){ //black
-        inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
+        inRange(HSV, Scalar(0, 0, 0), Scalar(180, 255, 30), mask1);
     }
     if (colour_code==5){ //white
-        inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
+        inRange(HSV, Scalar(0, 240, 100), Scalar(180, 255, 255), mask1);
     }
+    */
     
     return mask1;
 }
@@ -295,3 +302,13 @@ void Erosion( int erosion_elem, int erosion_size, Mat src,void*)
     imshow( "Erosion Demo", src );
 }
 
+void CallBackFunc(int event, int x, int y, int flags, void* ptr)
+{
+    Point*p = (Point*)ptr;
+    if  ( event == EVENT_LBUTTONDOWN )
+    {
+        cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")\npress any key to confirm this selction" << endl;
+        p->x = x;
+        p->y = y;
+    }
+}

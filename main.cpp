@@ -38,13 +38,16 @@ int main(int argc, const char * argv[]) {
         return -1;
     }
     
-    int ball_color; //0 red, 1 blue, 2 green, 3 yellow, 4 Black, 5 White
-    const int slider_max = 5;
-    namedWindow("set colour", WINDOW_NORMAL);
-    createTrackbar( "Ball colour set:", "set colour", &ball_color, slider_max);
+    cap>>img;
+    cv::resize(img, img, cv::Size(), 0.4, 0.4);
+    
+    Point p;
+    namedWindow("Select ball", 1);
+    setMouseCallback("Select ball", CallBackFunc, &p);
+    imshow("Select ball", img);
     waitKey(0);
-    destroyWindow("set colour");
-
+    destroyWindow("Select ball");
+    
     while(1){
         
         auto start = std::chrono::system_clock::now();
@@ -60,7 +63,7 @@ int main(int argc, const char * argv[]) {
         cv::resize(img, img, cv::Size(), 0.4, 0.4);
         
         //Thresholding
-        Mat thresh=make_Colour_Thresh(img,ball_color);
+        Mat thresh=make_Colour_Thresh(img,p);
         imshow("adsadasd", thresh);
         
         //Hough circles detection (make this a function??)
@@ -81,12 +84,14 @@ int main(int argc, const char * argv[]) {
                 objectcnt++;
                 circle( img, center, 1, Scalar(0,100,100), 3, LINE_AA);
                 // circle outline
+				objectcnt++;
                 int radius = c[2];
                 circle( img, center, radius, Scalar(255,0,255), 3, LINE_AA);
                 char str[200];
                 double cx = center.x;
                 double cy = center.y;
-                sprintf(str,"[%f , %f] is centre of ball %i",cx, cy,objectcnt);
+
+                sprintf(str,"[%f , %f] is centre %i",cx, cy, objectcnt);
                 putText(img, str, Point2f(10,20+10*(objectcnt+2)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
                 circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
             }
