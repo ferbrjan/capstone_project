@@ -29,7 +29,7 @@ int main(int argc, const char * argv[]) {
     vector<Vec4i> hierarchy;
     
     //Open video
-    VideoCapture cap("/Users/dinokfenicky/desktop/two_balls_1.mp4");//To use the webcam just use VideoCapture cap(0);
+    VideoCapture cap("two_balls_1.mp4");//To use the webcam just use VideoCapture cap(0);
     //Jan's route to video pls dont erase :DD "/Users/dinokfenicky/desktop/two_balls_1.mp4"
     
     //Errors?
@@ -91,7 +91,7 @@ int main(int argc, const char * argv[]) {
                 double cx = center.x;
                 double cy = center.y;
 
-                sprintf(str,"[%f , %f] is centre %i",cx, cy, objectcnt);
+                sprintf_s(str,"[%f , %f] is centre %i",cx, cy, objectcnt);
                 putText(img, str, Point2f(10,20+10*(objectcnt+2)), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
                 circle(img, Point(cx,cy), 5, Scalar (rand() & 255,rand() & 255,rand() & 255),FILLED);
             }
@@ -119,7 +119,7 @@ int main(int argc, const char * argv[]) {
         std::chrono::duration<double> diff = end-start;
         int FPS = 1 / diff.count();
         char str[200];
-        sprintf(str,"FPS: %i",FPS);
+        sprintf_s(str,"FPS: %i",FPS);
         putText(img, str, Point2f(10,20+10), FONT_HERSHEY_PLAIN, 0.8, Scalar(255,0,0));
         
         //Results

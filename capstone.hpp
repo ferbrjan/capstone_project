@@ -264,6 +264,24 @@ Mat make_Colour_Thresh(Mat img,Point x){ //0 for red , 1 for blue, 2 for green
     int V=hsv.val[2]; //value
     
     cout<< "hue value is "<<H<<", saturation value is "<<S<<", Value value is "<<V<<endl;
+	int H_range = 20, S_range=10, V_range=50;
+	int low_H=H- H_range, high_H=H+ H_range, low_S=S- S_range, high_S=S+ S_range, low_V=V- V_range, high_V=V+ V_range;
+
+	if (low_H < 0) {
+		low_H = 180 - abs(H - 20);
+	}
+	if (high_H> 180) {
+		high_H = abs(H + 20)- 180;
+	}
+	
+	if (low_S  < 0) low_S = 0;
+	if (low_V < 0) low_V = 0;
+	if (high_S > 255) high_S = 255;
+	if (high_V > 255) high_V = 255;
+	cout << "hue values high " << high_H << "hue values low "<< low_H << ", saturation values- high " << high_S << ", saturation values- high " << low_S
+		<< ", Value values- high" << high_V << ", Value values- high" << low_V << endl;
+	inRange(HSV, Scalar(low_H, low_S, low_V), Scalar(high_H, high_S, high_V), mask1);
+	//inRange(HSV, Scalar(60, 100, 50), Scalar(95, 255, 255), mask1);
     /*
     if (colour_code==0){
         inRange(HSV, Scalar(0, 120, 70), Scalar(10, 255, 255), mask1);
